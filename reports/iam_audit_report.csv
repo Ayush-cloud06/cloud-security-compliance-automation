@@ -1,0 +1,7 @@
+# Reports in this repository are anonymized examples. Real audit outputs are generated locally.
+
+username,check,status,details,checked_at
+****,access_key_age,FAIL,Key age *** days,2025-12-24T13:27:57+00:00
+****,mfa_enabled,FAIL,No MFA device attached,2025-12-24T13:27:57+00:00
+****,access_key_age,FAIL,Key age *** days,2025-12-24T13:27:57+00:00
+****,mfa_enabled,PASS,MFA enabled,2025-12-24T13:27:57+00:00

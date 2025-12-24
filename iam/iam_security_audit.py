@@ -1,40 +1,76 @@
 import boto3
 import csv
-
 from datetime import datetime, timezone
 
 iam = boto3.client("iam")
+
+results = []
+timestamp = datetime.now(timezone.utc).isoformat()
 
 response = iam.list_users()
 users = response["Users"]
 
 for user in users:
     username = user["UserName"]
-    print(f"\nUser: {username}")
 
+      # ACCESS KEY CHECK
+  
     keys_response = iam.list_access_keys(UserName=username)
     keys = keys_response["AccessKeyMetadata"]
 
     if not keys:
-        print("  No access keys")
-        continue
+        results.append({
+            "username": username,
+            "check": "access_keys_present",
+            "status": "PASS",
+            "details": "No access keys",
+            "checked_at": timestamp
+        })
+    else:
+        for key in keys:
+            created = key["CreateDate"]
+            age_days = (datetime.now(timezone.utc) - created).days
 
-    for key in keys:
-        key_id = key["AccessKeyId"]
-        status = key["Status"]
-        created = key["CreateDate"]
+            status = "FAIL" if age_days > 90 else "PASS"
 
-        age_days = (datetime.now(timezone.utc) - created).days
+            results.append({
+                "username": username,
+                "check": "access_key_age",
+                "status": status,
+                "details": f"Key age {age_days} days",
+                "checked_at": timestamp
+            })
 
-        print(f"  Key: {key_id}")
-        print(f"    Status: {status}")
-        print(f"    Age (days): {age_days}")
+    
+    # MFA CHECK
+   
+    mfa = iam.list_mfa_devices(UserName=username)
 
+    if not mfa["MFADevices"]:
+        results.append({
+            "username": username,
+            "check": "mfa_enabled",
+            "status": "FAIL",
+            "details": "No MFA device attached",
+            "checked_at": timestamp
+        })
+    else:
+        results.append({
+            "username": username,
+            "check": "mfa_enabled",
+            "status": "PASS",
+            "details": "MFA enabled",
+            "checked_at": timestamp
+        })
 
-mfa = iam.list_mfa_devices(UserName=username)
-if not mfa["MFADevices"]:
-    print("  No MFA devices assigned")
-else:
-    for device in mfa["MFADevices"]:
-        serial = device["SerialNumber"]
-        print(f"  MFA Device: {serial}")
+# WRITE CSV REPORT
+
+with open("reports/iam_audit_report.csv", "w", newline="") as f:
+    writer = csv.DictWriter(
+        f,
+        fieldnames=results[0].keys()
+    )
+    writer.writeheader()
+    writer.writerows(results)
+
+print("IAM audit report written to reports/iam_audit_report.csv")
