@@ -1,21 +1,42 @@
 import boto3
-from pprint import pprint
+import json
+from datetime import datetime, timezone
 
-# create the client FIRST
 s3 = boto3.client("s3")
 
-bucket_name = "ayushcloud.dev"
+results = []
+timestamp = datetime.now(timezone.utc).isoformat()
 
-try:
-    response = s3.get_public_access_block(Bucket=bucket_name)
-    config = response["PublicAccessBlockConfiguration"]
+# List all buckets
+buckets = s3.list_buckets()["Buckets"]
 
-    pprint(config)
+for bucket in buckets:
+    bucket_name = bucket["Name"]
 
-    if all(config.values()):
-        print("SECURE: Public access blocked")
-    else:
-        print("RISK: Public access NOT fully blocked")
+    try:
+        response = s3.get_public_access_block(Bucket=bucket_name)
+        config = response["PublicAccessBlockConfiguration"]
 
-except s3.exceptions.NoSuchPublicAccessBlockConfiguration:
-    print("RISK: No public access block configured")
+        # PASS / FAIL logic
+        status = "PASS" if all(config.values()) else "FAIL"
+        reason = "All public access blocks enabled" if status == "PASS" else "One or more public access blocks disabled"
+
+    except s3.exceptions.NoSuchPublicAccessBlockConfiguration:
+        status = "FAIL"
+        reason = "No public access block configuration found"
+
+    # Store structured result
+    results.append({
+        "resource_type": "s3_bucket",
+        "bucket_name": bucket_name,
+        "check": "public_access_block",
+        "status": status,
+        "reason": reason,
+        "checked_at": timestamp
+    })
+
+# Write JSON report (append-friendly design)
+with open("reports/s3_compliance_report.json", "w") as f:
+    json.dump(results, f, indent=2)
+
+print("S3 Public Access Block audit written to reports/s3_compliance_report.json")

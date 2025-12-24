@@ -1,0 +1,16 @@
+[
+  {
+    "resource_type": "s3_bucket",
+    "bucket_name": "ayushcloud.dev",
+    "check": "acl_public_access",
+    "status": "PASS",
+    "checked_at": "2025-12-24T12:52:34.412490+00:00"
+  },
+  {
+    "resource_type": "s3_bucket",
+    "bucket_name": "ayushofficial.xyz",
+    "check": "acl_public_access",
+    "status": "PASS",
+    "checked_at": "2025-12-24T12:52:34.412490+00:00"
+  }
+]
