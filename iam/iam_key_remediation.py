@@ -4,11 +4,14 @@ from datetime import datetime, timezone
 
 # Configuration
 
-ENFORCE = False   #  Set to True to enforce actions, False for dry-run
+ENFORCE = True   #  Set to True to enforce actions, False for dry-run
 WARN_DAYS = 90
 FAIL_DAYS = 180
 
-OUTPUT_FILE = "reports/iam_remediation_log.json"
+DEMO_FORCE_NON_COMPLIANT = True  # DEMO ONLY — force remediation path for testing ENFORCE logic
+TARGET_DEMO_KEY = "AK*******"
+
+OUTPUT_FILE = "iam_remediation_log.json"
 
 iam = boto3.client("iam")
 
@@ -21,11 +24,16 @@ for user in users:
     username = user["UserName"]
   # Access key check
     keys = iam.list_access_keys(UserName=username)["AccessKeyMetadata"]
+    
 
     for key in keys:
         key_id = key["AccessKeyId"]
         created = key["CreateDate"]
         age_days = (now - created).days
+        
+        if DEMO_FORCE_NON_COMPLIANT:
+            age_days = FAIL_DAYS + 2 # Demo to check Remediation with ENFORCE = True 
+
 
         if age_days > FAIL_DAYS:
             decision = "DISABLE"
@@ -61,15 +69,23 @@ for user in users:
         }
 
         # Controlled action
+        
+
         if decision == "DISABLE":
-            if ENFORCE:
+            if ENFORCE and key_id == TARGET_DEMO_KEY:
                 iam.update_access_key(
                     UserName=username,
                     AccessKeyId=key_id,
                     Status="Inactive"
                 )
+                action_taken = "ACCESS_KEY_DISABLED"
+                log_entry["action_taken"] = action_taken
+
             else:
-                print(f"[DRY-RUN] Would disable key {key_id} for user {username}")
+                #print(f"[DRY-RUN] Would disable key {key_id} for user {username}")
+                action_taken = "NONE"
+                log_entry["action_taken"] = action_taken
+
 
         logs.append(log_entry)
 
@@ -85,7 +101,10 @@ for user in users:
                 mfa_devices = iam.list_mfa_devices(UserName=username)["MFADevices"]
 
                 if not mfa_devices:
-                    logs.append({
+                    logs.append( {
+                        "action_taken": "ACCESS_KEY_DISABLED" if ENFORCE and decision == "DISABLE" else "NONE",
+
+                    },{
                             "control_id": "IAM.MFA.ENFORCEMENT",
                             "username": username,
                             "status": "FAIL",

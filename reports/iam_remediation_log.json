@@ -1,26 +1,38 @@
 [
   {
     "control_id": "IAM.KEY.ROTATION",
-    "username": "****",
+    "username": "ayu***",
     "access_key": "AKIA****",
-    "age_days": 181,
+    "age_days": 182,
     "status": "FAIL",
     "severity": "HIGH",
     "reason": "Access key age exceeds 180 days",
     "decision": "DISABLE",
     "mode": "DRY-RUN",
-    "timestamp": "2025-12-25T13:40:25.062711+00:00"
+    "timestamp": "2025-12-26T04:26:36.561477+00:00"
   },
   {
     "control_id": "IAM.KEY.ROTATION",
-    "username": "****",
+    "username": "Ay***sh_Udemy",
     "access_key": "AKIA****",
-    "age_days": 125,
-    "status": "WARN",
-    "severity": "MEDIUM",
-    "reason": "Access key age exceeds 90 days",
-    "decision": "ROTATE",
+    "age_days": 182,
+    "status": "FAIL",
+    "severity": "HIGH",
+    "reason": "Access key age exceeds 180 days",
+    "decision": "DISABLE",
     "mode": "DRY-RUN",
-    "timestamp": "2025-12-25T13:40:25.062711+00:00"
+    "timestamp": "2025-12-26T04:26:36.561477+00:00"
+  },
+  {
+    "control_id": "IAM.KEY.ROTATION",
+    "username": "Ay***",
+    "access_key": "AKIA****",
+    "age_days": 182,
+    "status": "FAIL",
+    "severity": "HIGH",
+    "reason": "Access key age exceeds 180 days",
+    "decision": "DISABLE",
+    "mode": "DRY-RUN",
+    "timestamp": "2025-12-26T04:26:36.561477+00:00"
   }
 ]
