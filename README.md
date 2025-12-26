@@ -1,6 +1,9 @@
 # Boto3 Cloud Security Automation
 Python scripts for auditing and automating AWS cloud security controls using boto3.
 
+## 📂 Repository Structure
+
+```text
 .
 ├── README.md
 ├── iam
@@ -14,5 +17,6 @@ Python scripts for auditing and automating AWS cloud security controls using bot
 │   └── s3_recommendations.json
 └── s3
     ├── s3_acl_check.py
+    ├── s3_acl_recomendations.py
     ├── s3_public_Access.py
     └── s3_remediation_recomendations.py
