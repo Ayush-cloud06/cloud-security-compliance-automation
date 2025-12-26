@@ -1,0 +1,12 @@
+[
+  {
+    "control_id": "S3.PUBLIC_ACCESS_BLOCK",
+    "resource_type": "s3_bucket",
+    "bucket_name": "boto3-demo-0666",
+    "severity": "HIGH",
+    "finding": "Public access block is not fully enabled",
+    "recommendation": "Enable all four public access block settings unless explicitly required",
+    "mode": "SUGGEST_ONLY",
+    "timestamp": "2025-12-26T05:16:49.633950+00:00"
+  }
+]
