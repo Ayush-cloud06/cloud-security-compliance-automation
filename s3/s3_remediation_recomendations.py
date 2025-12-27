@@ -68,8 +68,42 @@ for bucket in buckets:
     except Exception:
         pass  # acceptable for recommendation-only scans
 
+    # ---------- S3 Default Encryption ----------
+    
+    try:
+        enc = s3.get_bucket_encryption(Bucket=bucket_name)
+        rules = enc.get("ServerSideEncryptionConfiguration")["Rules"]
+        algo = rules[0]["ApplyServerSideEncryptionByDefault"]["SSEAlgorithm"]
+
+        # Encryption exists -> no findings (secure baseline)
+
+    except s3.exceptions.ClientError as e:
+
+        if e.response["Error"]["Code"] == "ServerSideEncryptionConfigurationNotFoundError":
+             results.append({
+            "control_id": "S3.ENCRYPTION",
+            "resource_type": "s3_bucket",
+            "bucket_name": bucket_name,
+            "severity": "MEDIUM",
+            "finding": "Default encryption is not enabled on the bucket",
+            "recommendation": "Enable default encryption using SSE-KMS (preferred) or SSE-S3",
+            "mode": "SUGGEST_ONLY",
+            "timestamp": timestamp
+        })
+        else:
+            results.append({
+                "control_id" : "S3.ENCRYPTION",
+                "resource_type" : "s3_bucket",
+                "bucket_name" : bucket_name,
+                "severity" : "UNKNOWN",
+                "finding" : f"Unable to evaluate bucket encryption: {str(e)}",
+                "recommendation" : "Manually review bucket encryption configuration",
+                "mode" : "SUGGEST_ONLY",
+                "timestamp": timestamp  
+            })
+
 # Write recommendation report
-with open("s3_recommendations.json", "w") as f:
-    json.dump(results, f, indent=2)
+with open("reports/3_recommendations.json", "w") as f:
+    json.dump(results, f, indent=1)
 
 print("S3 remediation recommendations written to reports/s3_recommendations.json")
